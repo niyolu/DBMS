@@ -196,12 +196,11 @@ SQL1063N  DB2START processing was successful.
    -c    Auto-Commit                               ON
 ```
 
-this can be altered via `db2 update command options using c <ON/OFF>` or `db2 <-c/+c>`
+this can be altered via `db2 update command options using c <ON/OFF>` or `db2 <-c/+c>`.
 
 ---
 
 # Questions
 
-did I list the connections in [13.](#13-what-are-the-five-alternatives-to-solve-the-problem-go-back-to-the-first-command-window-disconnect-from-sample-list-the-connections-how-many-connections-are-there-now) properly?
-
-
+- did I list the connections in [13.](#13-what-are-the-five-alternatives-to-solve-the-problem-go-back-to-the-first-command-window-disconnect-from-sample-list-the-connections-how-many-connections-are-there-now) properly?
+- where is part B?
