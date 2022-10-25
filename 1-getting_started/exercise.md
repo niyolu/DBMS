@@ -163,11 +163,11 @@ SQL1025N  The database manager was not stopped because databases are still activ
 
 ### 13. What are the five alternatives to solve the problem? Go back to the first command window, disconnect from SAMPLE. List the connections. How many connections are there now?
 
-1-3. Close all connections by using one of: `db2 connect reset`, `db2 terminate` or `db2 disconnect` per client and then `db2stop` 
+1. (-3.) Close all connections by using one of: `db2 connect reset`, `db2 terminate` or `db2 disconnect` per client and then `db2stop` 
 4. `force application all` forcefully disconnects all connected clients followed by `db2stop`
 5. `db2stop force`
 
-```bash
+```bat
 >> db2 force application all
 DB20000I  The FORCE APPLICATION command completed successfully.
 DB21024I  This command is asynchronous and may not be effective immediately.
