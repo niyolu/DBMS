@@ -167,7 +167,7 @@ SQL1025N  The database manager was not stopped because databases are still activ
 4. `force application all` forcefully disconnects all connected clients followed by `db2stop`
 5. `db2stop force`
 
-```bat
+```bash
 >> db2 force application all
 DB20000I  The FORCE APPLICATION command completed successfully.
 DB21024I  This command is asynchronous and may not be effective immediately.
