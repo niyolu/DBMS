@@ -53,17 +53,17 @@
    
 Windows environment variables are used by the CLP and probably some more db2 tools to config their context in the OS.
 Profile registry variables configure aspects about the DBMS itself.
-1. **What is similar? Are there any differences? How to set them?**
+2. **What is similar? Are there any differences? How to set them?**
    
 - OS: can be non-persistent on system or shell-session level, are issued by using `set`.
 - db2: controlled by `db2set` command.
-1. **Where are registry variables located on Windows?**
+3. **Where are registry variables located on Windows?**
    
 `%SystemRoot%\System32\config`
-1. **How to get a list of all supported registry variables?**
+4. **How to get a list of all supported registry variables?**
    
 `db2set -lr`
-1. **How to get the current instance?**
+5. **How to get the current instance?**
    
 `set | findstr DB2INSTANCE` or `echo %DB2INSTANCE%`
 
@@ -78,7 +78,7 @@ Profile registry variables configure aspects about the DBMS itself.
 1. **Explain the difference between a database and an instance.**
    
 An instance is a logical database manager environment where you catalog databases. Thus Several databases can live in an instance while several instances can run on a single server. Having multiple instances is motivated by dev/prod parity, environment specific tuning/optimization, confidentiality, redundance (availability).
-1. **Locate a database and an instance on your computer. Where would you look for them?**
+2. **Locate a database and an instance on your computer. Where would you look for them?**
    
 See environment variable `DB2PATH`.
 #### 6. Which database objects are you familiar with? Describe the database objects.
@@ -93,7 +93,7 @@ A database object is any defined object in a database that is used to store or r
 1. **For the SQL-Statement “select * from labor.headers” identify the database you are connected to, the schema you are working in and the table you are retrieving data.**
    
 the database is called labor, idk what the other stuff is
-1. **Explain what a schema is and give examples how you could benefit from its use.**
+2. **Explain what a schema is and give examples how you could benefit from its use.**
    
 Structure of a database described in a formal language. Formally it is the set of formulas called integrity constraints that are to be imposed on database.
 #### 8. Read the document for the lab exercise. Add your own questions, at least one.
