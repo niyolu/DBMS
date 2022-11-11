@@ -11,6 +11,13 @@
     - [6. Make your computer a client to access a remote server run by one of your classmates:](#6-make-your-computer-a-client-to-access-a-remote-server-run-by-one-of-your-classmates)
     - [7. Examine the node and database directories, for each instance separately.](#7-examine-the-node-and-database-directories-for-each-instance-separately)
     - [8. Connect to the remote RMTSAMP database as user Administrator. Select all rows from the EMPLOYEE table. Show the proof that you really see the remote EMPLOYEE table of your classmate instead of yours. Insert another employee into the EMPLOYEE table with your firstname and lastname.](#8-connect-to-the-remote-rmtsamp-database-as-user-administrator-select-all-rows-from-the-employee-table-show-the-proof-that-you-really-see-the-remote-employee-table-of-your-classmate-instead-of-yours-insert-another-employee-into-the-employee-table-with-your-firstname-and-lastname)
+    - [9. Open a second DB2 Command Window. Let user Su connect to the local SAMPLE database using Lab2-Usr as password. Get a list of all tables.](#9-open-a-second-db2-command-window-let-user-su-connect-to-the-local-sample-database-using-lab2-usr-as-password-get-a-list-of-all-tables)
+    - [10. Open a third DB2 Command Window. Let user Bob connect to the remote RMTSAMP database using Lab2-Usr as password. Get a list of all tables.](#10-open-a-third-db2-command-window-let-user-bob-connect-to-the-remote-rmtsamp-database-using-lab2-usr-as-password-get-a-list-of-all-tables)
+    - [11. Switch back to your first DB2 Command Window. List out all connections to the current instance DB2. Which applications do you expect to be connected, which ones are missing, why are they missing?](#11-switch-back-to-your-first-db2-command-window-list-out-all-connections-to-the-current-instance-db2-which-applications-do-you-expect-to-be-connected-which-ones-are-missing-why-are-they-missing)
+    - [12. Attach to node RMTNODE. List out all the connections to RMTNODE.](#12-attach-to-node-rmtnode-list-out-all-the-connections-to-rmtnode)
+    - [13. Force the application of Bob to stop.](#13-force-the-application-of-bob-to-stop)
+    - [14. Switch to Bob’s DB2 Command Windows. Try to get a list of all tables. What](#14-switch-to-bobs-db2-command-windows-try-to-get-a-list-of-all-tables-what)
+    - [15. Detach from node RMNODE.](#15-detach-from-node-rmnode)
 
 ### Objectives
 Examine the DB2 node and database directories
@@ -151,7 +158,7 @@ for his IP-address as hostname, use 50004 as services name (which is
 actually the port number of the instance), use DEVELOP as instance
 name, and omit other optional clauses. Name this node entry RMTNODE.
   ```bash
-  (@DB2, @)catalog tcpip node RMTNODE remote >REMOTE_IP> server 50004 remote_instance DEVELOP
+  (@DB2, @)catalog tcpip node RMTNODE remote <REMOTE_IP> server 50004 remote_instance DEVELOP
   DB20000I  The CATALOG TCPIP NODE command completed successfully.
   DB21056W  Directory changes may not be effective until the directory cache is
   refreshed
@@ -244,17 +251,153 @@ omit other optional clauses. Why using a database alias?
 
 ### 8. Connect to the remote RMTSAMP database as user Administrator. Select all rows from the EMPLOYEE table. Show the proof that you really see the remote EMPLOYEE table of your classmate instead of yours. Insert another employee into the EMPLOYEE table with your firstname and lastname.
 ```bash
->> db2 connect to RMTSAMP
-SQL30081N  A communication error has been detected. Communication protocol
-being used: "TCP/IP".  Communication API being used: "SOCKETS".  Location
-where the error was detected: "3.69.146.24".  Communication function detecting
-the error: "connect".  Protocol specific error code(s): "10060", "*", "*".
-SQLSTATE=08001
+>> db2 connect to RMTSAMP user ADMINISTRATOR
+Enter current password for ADMINISTRATOR:
 
->> db2 attach to RMTNODE
+Database Connection Information
+
+Database server        = DB2/NT64 11.1.1.1
+SQL authorization ID   = ADMINIST...
+Local database alias   = RMTSAMP
+
+
+(@DB2, ADMINIST@RMTSAMP)INSERT INTO employee (empno, firstnme, lastname, edlevel) VALUES (42069, 'Nils', 'Lubenius', 99)
+DB20000I  The SQL command completed successfully.
+
+(@DB2, ADMINIST@RMTSAMP)SELECT * FROM EMPLOYEE WHERE FIRSTNME='Michael'
+
+EMPNO  FIRSTNME     MIDINIT LASTNAME        WORKDEPT PHONENO HIREDATE   JOB      EDLEVEL SEX BIRTHDATE  SALARY      BONUS       COMM
+------ ------------ ------- --------------- -------- ------- ---------- -------- ------- --- ---------- ----------- ----------- -----------
+000000 Michael      -       Mustermann        -        -       -          -             99 -   -                    -           -           -
+
+1 record(s) selected.
+```
+
+### 9. Open a second DB2 Command Window. Let user Su connect to the local SAMPLE database using Lab2-Usr as password. Get a list of all tables.
+
+```bash
+(@DB2, @)connect to SAMPLE user Su
+
+
+(@DB2, SU      @SAMPLE)list tables
+
+Table/View                      Schema          Type  Creation time
+------------------------------- --------------- ----- --------------------------
+
+  0 record(s) selected.
+
+(@DB2, SU      @SAMPLE) list tables for schema ADMINISTRATOR
+
+Table/View                      Schema          Type  Creation time
+------------------------------- --------------- ----- --------------------------
+ACT                             ADMINISTRATOR   T     2022-10-25-23.51.22.181003
+...
+ADEFUSR                         ADMINISTRATOR   S     2022-10-25-23.51.23.
+614002
+
+  47 record(s) selected.
+```
+
+### 10. Open a third DB2 Command Window. Let user Bob connect to the remote RMTSAMP database using Lab2-Usr as password. Get a list of all tables.
+
+```bash
+(@DB2, @)connect to SAMPLE user Bob
+
+(@DB2, SU      @SAMPLE)list tables
+
+Table/View                      Schema          Type  Creation time
+------------------------------- --------------- ----- --------------------------
+
+0 record(s) selected.
+
+(@DB2, SU      @SAMPLE) list tables for schema ADMINISTRATOR
+
+Table/View                      Schema          Type  Creation time
+------------------------------- --------------- ----- --------------------------
+ACT                             ADMINISTRATOR   T     2022-10-25-23.51.22.181003
+...
+ADEFUSR                         ADMINISTRATOR   S     2022-10-25-23.51.23.
+614002
+
+47 record(s) selected.
+```
+
+### 11. Switch back to your first DB2 Command Window. List out all connections to the current instance DB2. Which applications do you expect to be connected, which ones are missing, why are they missing?
+
+```bash
+(@DB2, ADMINIST@RMTSAMP)list applications show detail
+
+CONNECT Auth Id                                                                                                                  Application Name     Appl.      Application Id                                                 Seq#  Number of  Coordinating     Coordinator     Status                         Status Change Time         Node     DB Name  DB Path
+                                                                                                                                                      Handle                                                                          Agents     member number    pid/thread
+-------------------------------------------------------------------------------------------------------------------------------- -------------------- ---------- -------------------------------------------------------------- ----- ---------- ---------------- --------------- ------------------------------ -------------------------- -------- -------- --------------------
+SU                                                                                                                               db2lused             13         *LOCAL.DB2.221111172527                                        00001 1          0                2480            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2evml_DB2DETAILDEA 19         *LOCAL.DB2.221111172533                                        00001 1          0                2700            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2wlmd              12         *LOCAL.DB2.221111172526                                        00001 1          0                1680            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2taskd             11         *LOCAL.DB2.221111172525                                        00001 1          0                812             Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2pcsd              17         *LOCAL.DB2.221111172531                                        00001 1          0                2924            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2stmm              10         *LOCAL.DB2.221111172524                                        00001 1          0                680             Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2fw1               16         *LOCAL.DB2.221111172530                                        00001 1          0                2476            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2bp.exe            9          *LOCAL.DB2.221111172523                                        00005 1          0                3264            UOW Waiting                    Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2fw0               15         *LOCAL.DB2.221111172529                                        00001 1          0                2492            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+SU                                                                                                                               db2dbctrld           14         *LOCAL.DB2.221111172528                                        00001 1          0                2516            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+
+```
+
+### 12. Attach to node RMTNODE. List out all the connections to RMTNODE.
+
+```bash
+(@DB2, ADMINIST@RMTSAMP)attach to RMTNODE user Administrator using Database22ws
+
+Instance Attachment Information
+
+Instance server        = DB2/NT64 11.1.1.1
+Authorization ID       = ADMINIST...
+Local instance alias   = RMTNODE
+
+
+(ADMINIST@RMTNODE, ADMINIST@RMTSAMP)list applications show detail
+
+CONNECT Auth Id                                                                                                                  Application Name     Appl.      Application Id                                                 Seq#  Number of  Coordinating     Coordinator     Status                         Status Change Time         Node     DB Name  DB Path
+                                                                                                                                                      Handle                                                                          Agents     member number    pid/thread
+-------------------------------------------------------------------------------------------------------------------------------- -------------------- ---------- -------------------------------------------------------------- ----- ---------- ---------------- --------------- ------------------------------ -------------------------- -------- -------- --------------------
+ADMINISTRATOR                                                                                                                    db2dbctrld           32         *LOCAL.DB2.221111171934                                        00001 1          0                1596            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+BOB                                                                                                                              db2bp.exe            58         <REMOTE_IP>.49751.221111173237                                00004 1          0                6060            UOW Waiting                    Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2lused             31         *LOCAL.DB2.221111171933                                        00001 1          0                1340            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2evml_DB2DETAILDEA 37         *LOCAL.DB2.221111171939                                        00001 1          0                5956            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2wlmd              30         *LOCAL.DB2.221111171932                                        00001 1          0                1536            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2taskd             29         *LOCAL.DB2.221111171931                                        00001 1          0                1188            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2pcsd              35         *LOCAL.DB2.221111171937                                        00001 1          0                2456            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2stmm              28         *LOCAL.DB2.221111171930                                        00001 1          0                824             Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2fw1               34         *LOCAL.DB2.221111171936                                        00001 1          0                796             Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2bp.exe            27         <REMOTE_IP>.49738.221111171929                                00006 1          0                5836            UOW Waiting                    Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+ADMINISTRATOR                                                                                                                    db2fw0               33         *LOCAL.DB2.221111171935                                        00001 1          0                3104            Connect Completed              Not Collected              EC2AMAZ- SAMPLE   C:\DB2\NODE0000\SQL00001\MEMBER0000\
+```
+
+### 13. Force the application of Bob to stop.
+
+Look up bobs handle in the connection listing.
+
+```bash
+(ADMINIST@RMTNODE, ADMINIST@RMTSAMP) force application (58)
+DB20000I  The FORCE APPLICATION command completed successfully.
+DB21024I  This command is asynchronous and may not be effective immediately.
+```
+
+### 14. Switch to Bob’s DB2 Command Windows. Try to get a list of all tables. What
+is the error message?
+
+```bash
+list tables
 SQL30081N  A communication error has been detected. Communication protocol
 being used: "TCP/IP".  Communication API being used: "SOCKETS".  Location
-where the error was detected: "3.69.146.24".  Communication function detecting
-the error: "connect".  Protocol specific error code(s): "10060", "*", "*".
+where the error was detected: "18.159.35.228".  Communication function
+detecting the error: "recv".  Protocol specific error code(s): "*", "*", "0".
 SQLSTATE=08001
+```
+
+### 15. Detach from node RMNODE.
+
+```bash
+(ADMINIST@RMTNODE, ADMINIST@RMTSAMP)detach
+DB20000I  The DETACH command completed successfully.
 ```
