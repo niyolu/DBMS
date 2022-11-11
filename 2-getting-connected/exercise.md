@@ -77,10 +77,11 @@ DB20000I  The SQL command completed successfully.
 ```
 
 ### 3. Customize your CLP prompt by using the DB2_CLPPROMPT registry variable. This will show you instance attachment, database connection and user authorization. So, you will not get lost in the following exercises.
-```bash
-db2set DB2_CLPPROMPT=(%ia@%i," "%da@%d)
 
-db2
+```bash
+>> db2set DB2_CLPPROMPT=(%ia@%i," "%da@%d)
+
+>> db2
 (@DB2, @)connect to sample
 
 Database Connection Information
@@ -93,6 +94,7 @@ Local database alias   = SAMPLE
 ```
 
 ### 4. You are now enabling one of your instances for being accessed by a remote client:
+
 - Set your current instance to DEVELOP
   `set DB2INSTANCE=DEVELOP`
 - Set TCP as communication protocol
@@ -100,7 +102,7 @@ Local database alias   = SAMPLE
 - Set service db2c_develop to listen on port 50004 
   - update dbm cfg using SVCENAME db2c_develop;
     ```bash
-    db2 update dbm cfg using SVCENAME db2c_develop
+    >> db2 update dbm cfg using SVCENAME db2c_develop
     DB20000I  The UPDATE DATABASE MANAGER CONFIGURATION command completed successfully.
     ```
   - open C:\Windows\system32\drivers\etc\services and add db2c_DEVELOP 50004/TCP (already done by lecturer)
@@ -124,21 +126,35 @@ Local database alias   = SAMPLE
 - Configure your windows firewall to allow inbound communication via TCP port 50004 (already done by lecturer)
   ![Firewall Settings](./src/firewall.png)
 
+- NOTES:
+  The port has to be set via `db2 update dbm cfg using SVCENAME 50004` (not sure why the db2c_develop cmd was needed).
+  To enforce the catalog changes restart the manager: 
+  1. `db2 terminate`
+  2. `db2stop`
+  3. `db2start`
+
+  To verify the tcp connection:
+  ```bash
+  >> netstat -tan | findstr 50004
+  TCP    0.0.0.0:50004          0.0.0.0:0              LISTENING       InHost
+  TCP    [::]:50004             [::]:0                 LISTENING       InHost
+  ```
+
 ### 5. Let your classmate catalog your instance and your database by telling him your current IP-address, which comes from the title of your RDP-window, e.g. 18.156.82.154 for a title like “ec2-18-156-82-154.eu-central- 1.compute.amazonaws.com”. See next step how to catalog. Follow the manipulation of your data done by your classmate.
 
 ### 6. Make your computer a client to access a remote server run by one of your classmates:
 
 - Set your current instance to DB2
-  `set DB2INSTANCE=DB2
+  `set DB2INSTANCE=DB2`
 - Catalog a TCPIP node. Use TCPIP as protocol, ask one of your classmates
 for his IP-address as hostname, use 50004 as services name (which is
 actually the port number of the instance), use DEVELOP as instance
 name, and omit other optional clauses. Name this node entry RMTNODE.
   ```bash
-  (@DB2, @) catalog tcpip node RMTNODE remote <REMOTE_IP> server DEVELOP
+  (@DB2, @)catalog tcpip node RMTNODE remote >REMOTE_IP> server 50004 remote_instance DEVELOP
   DB20000I  The CATALOG TCPIP NODE command completed successfully.
   DB21056W  Directory changes may not be effective until the directory cache is
-  refreshed.
+  refreshed
   ```
 
 - Catalog the remote database SAMPLE. USE RMTSAMP as database
@@ -151,60 +167,94 @@ omit other optional clauses. Why using a database alias?
   refreshed.
   ```
   The alias is used to differentiate between the local and remote databases named DEVELOP.
-  To enforce the catalog changes restart the manager: `db2 terminate` `db2stop` `db2start` followed by `db2 update dbm cfg using SVCENAME 50004`.
-  To verify the tcp connection:
-  ```bash
-  >> netstat -tan | findstr 50004
-  TCP    0.0.0.0:50004          0.0.0.0:0              LISTENING       InHost
-  TCP    [::]:50004             [::]:0                 LISTENING       InHost
-  ```
 
 ### 7. Examine the node and database directories, for each instance separately.
 
-```bash
->> db2 list db directory
+- DB2:
+  ```bash
+  >> db2 list db directory
 
-System Database Directory
-Number of entries in the directory = 2
+  System Database Directory
+  Number of entries in the directory = 2
 
-Database 1 entry:
+  Database 1 entry:
 
-Database alias                       = RMTSAMP
-Database name                        = SAMPLE
-Node name                            = RMTNODE
-Database release level               = 14.00
-Comment                              =
-Directory entry type                 = Remote
-Authentication                       = SERVER
-Catalog database partition number    = -1
-Alternate server hostname            =
-Alternate server port number         =
+  Database alias                       = RMTSAMP
+  Database name                        = SAMPLE
+  Node name                            = RMTNODE
+  Database release level               = 14.00
+  Comment                              =
+  Directory entry type                 = Remote
+  Authentication                       = SERVER
+  Catalog database partition number    = -1
+  Alternate server hostname            =
+  Alternate server port number         =
 
-Database 2 entry:
+  Database 2 entry:
 
-Database alias                       = SAMPLE
-Database name                        = SAMPLE
-Local database directory             = C:
-Database release level               = 14.00
-Comment                              =
-Directory entry type                 = Indirect
-Catalog database partition number    = 0
-Alternate server hostname            =
-Alternate server port number         =
+  Database alias                       = SAMPLE
+  Database name                        = SAMPLE
+  Local database directory             = C:
+  Database release level               = 14.00
+  Comment                              =
+  Directory entry type                 = Indirect
+  Catalog database partition number    = 0
+  Alternate server hostname            =
+  Alternate server port number         =
 
->> db2 list node directory
+  >> db2 list node directory
 
-Node Directory
-Number of entries in the directory = 1
+  Node Directory
 
-Node 1 entry:
+  Number of entries in the directory = 1
 
-Node name                      = RMTNODE
-Comment                        =
-Directory entry type           = LOCAL
-Protocol                       = TCPIP
-Hostname                       = <REMOTE_IP>
-Service name                   = DEVELOP
-```
+  Node 1 entry:
+
+  Node name                      = RMTNODE
+  Comment                        =
+  Directory entry type           = LOCAL
+  Protocol                       = TCPIP
+  Hostname                       = <REMOTE_IP>
+  Service name                   = 50004
+  ```
+
+- DEVELOP:
+  ```bash
+  >> db2 list db directory
+
+  System Database Directory
+
+  Number of entries in the directory = 1
+
+  Database 1 entry:
+
+  Database alias                       = SAMPLE
+  Database name                        = SAMPLE
+  Local database directory             = C:
+  Database release level               = 14.00
+  Comment                              =
+  Directory entry type                 = Indirect
+  Catalog database partition number    = 0
+  Alternate server hostname            =
+  Alternate server port number         =
+
+  >> db2 list node director
+  SQL1027N  The node directory cannot be found.
+  ```
 
 ### 8. Connect to the remote RMTSAMP database as user Administrator. Select all rows from the EMPLOYEE table. Show the proof that you really see the remote EMPLOYEE table of your classmate instead of yours. Insert another employee into the EMPLOYEE table with your firstname and lastname.
+```bash
+>> db2 connect to RMTSAMP
+SQL30081N  A communication error has been detected. Communication protocol
+being used: "TCP/IP".  Communication API being used: "SOCKETS".  Location
+where the error was detected: "3.69.146.24".  Communication function detecting
+the error: "connect".  Protocol specific error code(s): "10060", "*", "*".
+SQLSTATE=08001
+
+>> db2 attach to RMTNODE
+SQL30081N  A communication error has been detected. Communication protocol
+being used: "TCP/IP".  Communication API being used: "SOCKETS".  Location
+where the error was detected: "3.69.146.24".  Communication function detecting
+the error: "connect".  Protocol specific error code(s): "10060", "*", "*".
+SQLSTATE=08001
+```
