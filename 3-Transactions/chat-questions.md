@@ -9,7 +9,7 @@ A transaction is at least one or more SQL statements that are grouped togehter a
     insert into DEPT values(100, 'Payroll')
     insert into DEPT values(200, 'ACCOUNTING')
     commit
-    insert into DEPT values(300, 'sales')
+    insert into DEPT values(300, 'SALES')
     rollback
     insert into DEPT values(500, 'MARKETING')
     commit
@@ -53,17 +53,16 @@ Concurrency means to perform transactions in a multi-user environment simultanio
 You will be confrontet with four differen problems, whe not using any concurrency control
 
         [Lost update]
-        -> Another Transaction overwrites updated rows of data shortly after committment
+        -> A transaction is overwritten by another user's interaction after the first commit, the overwriting transaction doesn't notice
 
         [Uncommitted read/"dirty read"]
-        -> This happens when a transaction reads data that has not been committed
+        -> A transaction reads data that has not been committed
 
         [Non-repeatable read]
-        -> This happens when a transaction reads the same row of data twice, but gets different values
+        -> A transaction reads data twice with another transaction modifying it leading to different results on the same data
 
         [Phantom read]
-        -> This happens when a transaction inserts data with the same search properties.
-        In a second search statement you would get additional data
+        -> When a transaction searches while another inserts data with the same search properties a subsequent search will get additional data
 
 ## Give an example for lost update, uncommitted read/dirty read, non-repeatable read, phantom read
 
@@ -76,7 +75,7 @@ You will be confrontet with four differen problems, whe not using any concurrenc
         [Uncommitted read/Dirty Read]
         1. Transaction 1 changes a row of data;
         2. Transaction 2 reads the uncommitted data;
-        3. Transaction 1 is been rolled back;
+        3. Transaction 1 rolls back;
 
         [Nonrepeatable Read]
         1. Transaction 1 reads a row of data;
@@ -91,19 +90,19 @@ You will be confrontet with four differen problems, whe not using any concurrenc
 
 ## Name the different levels of protection to isolate data
 
-An isolation level determines how data used in one transaction is locked or isolated from other transactions while it is being accessed. Four different isolation levels are available with db2:
+An isolation level determines how data used in one transaction is locked or isolated from other transactions while it is being accessed. Four different isolation levels are available with db2 (Db2/Ansi - levelname):
 
-        [Repeatable Read]
+        [Repeatable Read/Serializable]
         All rows retrieved by a single transaction are locked.
         Transactions are completely isolated and phantom rows are not seen.
 
-        [Read Stability]
-        All rows retrieved by a single transaction are locked; transactions are not completely isolated and phantom rows an be seen and nonrepeatable reads can occor, because is doesn't completely isolate one transaction from the effects of other concurrent transactions.
+        [Read Stability/Repeatable Read]
+        All rows retrieved by a single transaction are locked; transactions are not completely isolated and phantom rows can be seen and nonrepeatable reads can occor, because is doesn't completely isolate one transaction from the effects of other concurrent transactions.
 
-        [Cursor Stability]
+        [Cursor Stability/Read Commited]
         Any row beeing accessed by a transaction is locked, provided the cursor is positioned on that row. transactions running under the Cursur stability level can't see uncommitted changes made by other transactions. nonrepeatable reads and phantom reads are possible
 
-        [Uncommitted read]
+        [Uncommitted read/Read Uncommited]
         Transactions can access uncomitted changes made by other transactions; transactions are not isolated and dirty reads, nonrepeatable reads and phandtom reads are possbile
 
 ## Explain slide 'Comparing isolation levels'
