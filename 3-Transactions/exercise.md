@@ -327,7 +327,7 @@ were obtained for rows of the TEST_TAKEN table. For Uncommitted Read isolation l
 obtained for the TEST_TAKEN table. 
 
 - **Share (S)**
-  Read only lock for owner and all concurrent applications. An unlocked table is lockable on row-level.
+  Read-only lock for owner and all concurrent applications. An unlocked table is lockable on row-level.
 
 - **Intent Share (IS)**
   The lock owner has read-only capabilities on the locked table but doesn't acquire row-level locks allowing concurrent applications to read and change data. When an IS lock is owned by a transaction it acquires a share lock on each read row. The intent lock is acquired when a transaction does not convey the intent to update any rows in the table
